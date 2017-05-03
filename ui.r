@@ -126,6 +126,13 @@ fluidPage(theme = shinytheme('simplex'),
                              than 0, some items will be excluded from the
                              visualization.')
                           ),
+                        #add vertical lines for median and means
+                        checkboxGroupInput('hist_vert_lines',
+                                           label = 'Add Vertical Lines For',
+                                           choices = c(
+                                             'Median (blue)' = 'Median',
+                                             'Mean (red)' = 'Mean'
+                                           )),
                         #facetting histogram view
                         conditionalPanel("!input.exclude_late",
                                          checkboxGroupInput('facet_hist',
@@ -155,7 +162,8 @@ fluidPage(theme = shinytheme('simplex'),
                                          )
                         ,uiOutput('hist_filter')
                         ),
-                 mainPanel(plotOutput(outputId = 'histogram'))
+                 mainPanel(plotOutput(outputId = 'histogram'),
+                           dataTableOutput('hist_table_check'))
                       )
              ),
              # scatter plot panel

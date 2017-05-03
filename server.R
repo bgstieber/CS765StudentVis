@@ -236,7 +236,15 @@ get_post_data <- function(js, num_order = 'row_num'){
     mutate(post_count = ifelse(is.finite(post_count), post_count, 0)) %>%
     as.data.frame
 }
-#design tha pp
+
+########################
+### Begin Shiny App ###
+#######################
+
+
+#design the app
+
+
 function(input, output){
   ##############
   ##Data Steps##
@@ -504,17 +512,109 @@ function(input, output){
     
   })
   
+  #add vertical line to data
+  vertical_line_data <- reactive({
+    
+    if(input$exclude_late){
+      if(input$facet_hist2){
+        #need to calculate mean and median by type
+        full_data() %>% 
+          filter(assign_name %in% input$hist_assign_filter) %>%
+          group_by(type) %>%
+          summarise_(avg_value = paste('mean(', input$hist_value, ', na.rm = T)'),
+                     .dots = as.formula(paste0("~ median(", input$hist_value,
+                                               ", na.rm = T)"))) %>%
+          setNames(., c('type', 'mean','median'))
+      }else{
+        full_data() %>% 
+          filter(assign_name %in% input$hist_assign_filter) %>%
+          summarise_(avg_value = paste('mean(', input$hist_value, ', na.rm = T)'),
+                     .dots = as.formula(paste0("~ median(", input$hist_value,
+                                               ", na.rm = T)"))) %>%
+          setNames(., c('mean','median'))
+      }
+    }else{
+      if(is.null(input$facet_hist)){
+        full_data() %>% 
+          filter(assign_name %in% input$hist_assign_filter) %>%
+          summarise_(avg_value = paste('mean(', input$hist_value, ', na.rm = T)'),
+                     .dots = as.formula(paste0("~ median(", input$hist_value,
+                                               ", na.rm = T)"))) %>%
+          setNames(., c('mean','median'))
+      }else if(all(input$facet_hist == 'Late Indicator')){
+        #calculate mean and median by late indicator
+        full_data() %>% 
+          filter(assign_name %in% input$hist_assign_filter) %>%
+          group_by(type, LateIndicator) %>%
+          summarise_(avg_value = paste('mean(', input$hist_value, ', na.rm = T)'),
+                     .dots = as.formula(paste0("~ median(", input$hist_value,
+                                               ", na.rm = T)"))) %>%
+          setNames(., c('LateIndicator', 'mean','median'))
+      }else if(all(input$facet_hist == 'Assignment Type')){
+        #calculate mean and median by type
+        full_data() %>% 
+          filter(assign_name %in% input$hist_assign_filter) %>%
+          group_by(type) %>%
+          summarise_(avg_value = paste('mean(', input$hist_value, ', na.rm = T)'),
+                     .dots = as.formula(paste0("~ median(", input$hist_value,
+                                               ", na.rm = T)"))) %>%
+          setNames(., c('type', 'mean','median'))
+      }else if(all(input$facet_hist == c('Assignment Type','Late Indicator'))){
+        full_data() %>% 
+          filter(assign_name %in% input$hist_assign_filter) %>%
+          group_by(type, LateIndicator) %>%
+          summarise_(avg_value = paste('mean(', input$hist_value, ', na.rm = T)'),
+                     .dots = as.formula(paste0("~ median(", input$hist_value,
+                                               ", na.rm = T)"))) %>%
+          setNames(., c('type','LateIndicator', 'mean','median'))
+      }else{
+        full_data() %>% 
+          filter(assign_name %in% input$hist_assign_filter) %>%
+          summarise_(avg_value = paste('mean(', input$hist_value, ', na.rm = T)'),
+                     .dots = as.formula(paste0("~ median(", input$hist_value,
+                                               ", na.rm = T)"))) %>%
+          setNames(., c('mean','median'))
+      }
+    }
+    
+    
+  })
+  
+
+  add_median_line <- reactive({
+    if(is.null(input$hist_vert_lines) | !any(input$hist_vert_lines == 'Median')){
+      NULL
+    }else{
+      geom_vline(data = vertical_line_data(),
+                 aes(xintercept = median),
+                 colour = 'blue', linetype = 'dashed')
+    }
+  })
+  
+  add_mean_line <- reactive({
+    if(is.null(input$hist_vert_lines) | !any(input$hist_vert_lines == 'Mean')){
+      NULL
+    }else{
+      geom_vline(data = vertical_line_data(),
+                 aes(xintercept = mean),
+                 colour = 'red', linetype = 'dashed')
+    }
+  })
+  
+  
   #create histogram
   output$histogram <- renderPlot({
     ggplot(data = full_data() %>% 
              filter(assign_name %in% input$hist_assign_filter)) +
       aes_string(x = input$hist_value)+
       auto_scale(scale = input$hist_trans)+
-      geom_histogram(bins = input$hist_bin) +
-      scale_fill_brewer(palette = 'Set1')+
+      geom_histogram(bins = input$hist_bin)+
+      add_median_line()+
+      add_mean_line()+
       hist_facet()
   })
-
+  
+  
   
   ##############
   #Scatter plot#
