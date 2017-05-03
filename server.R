@@ -6,7 +6,8 @@ library(scales) #nice formatting
 theme_set(theme_bw()) #set theme for ggplot2
 #library(lme4) #possibly fixed mixed effects models
 library(stringr) #easy string maniupulation
-library(DT)
+library(DT) #interactive data tables
+library(RColorBrewer) #color palettes
 #data files from github
 simp_three_by_three <-
 "https://raw.githubusercontent.com/uwgraphics/cs765-dc3-data-and-code/master/SimpleData/3x3.json"
@@ -233,7 +234,11 @@ get_post_data <- function(js, num_order = 'row_num'){
     group_by(assignment, type) %>%
     mutate(NumPostMedian = median(post_count)) %>%
     ungroup() %>%
-    mutate(post_count = ifelse(is.finite(post_count), post_count, 0)) %>%
+    mutate(post_count = ifelse(is.finite(post_count), post_count, 0),
+           post_count_bin = factor(
+             ifelse(post_count > 5, '>5', post_count),
+             levels = c(-2:5, '>5'),
+             ordered = TRUE)) %>%
     as.data.frame
 }
 
@@ -449,7 +454,7 @@ function(input, output){
     geom_tile() +
     color_by_text()+
     facet_wrap(~type, scales = c('fixed', 'free')[input$free_x_heat + 1])+
-    scale_fill_gradient(high = '#a50f15', low = '#fee5d9')+
+    scale_fill_gradientn(colors = brewer.pal(6, 'YlOrRd'))+
     scale_colour_text() +
     show_x_axis()+
     theme(axis.text.y = element_text(size = 7))
@@ -497,8 +502,7 @@ function(input, output){
       if(is.null(input$facet_hist)){
         NULL
       }else if(all(input$facet_hist == 'Late Indicator')){
-        facet_wrap(~LateIndicator, 
-                   scales = c('fixed', 'free')[input$free_scales + 1])
+        facet_wrap(~LateIndicator, scales = c('fixed', 'free')[input$free_scales + 1])
       }else if(all(input$facet_hist == 'Assignment Type')){
         facet_wrap(~type, 
                    scales = c('fixed', 'free')[input$free_scales + 1])
@@ -545,7 +549,7 @@ function(input, output){
         #calculate mean and median by late indicator
         full_data() %>% 
           filter(assign_name %in% input$hist_assign_filter) %>%
-          group_by(type, LateIndicator) %>%
+          group_by(LateIndicator) %>%
           summarise_(avg_value = paste('mean(', input$hist_value, ', na.rm = T)'),
                      .dots = as.formula(paste0("~ median(", input$hist_value,
                                                ", na.rm = T)"))) %>%
@@ -654,6 +658,7 @@ function(input, output){
                                  'Sum Post Length' = 'post_sum',
                                  'Median Post Length' = 'post_median',
                                  'Number of Posts' = 'post_count',
+                                 'Number of Posts (bin)' = 'post_count_bin',
                                  'Number of Images' = 'image_sum',
                                  'Median Number of Posts' = 'NumPostMedian'
                      ), selected = 'None')   
@@ -669,6 +674,7 @@ function(input, output){
                                  'Sum Post Length' = 'post_sum',
                                  'Median Post Length' = 'post_median',
                                  'Number of Posts' = 'post_count',
+                                 'Number of Posts (bin)' = 'post_count_bin',
                                  'Number of Images' = 'image_sum',
                                  'Median Number of Posts' = 'NumPostMedian',
                                  'Prompt' = 'assign_prompts'
@@ -687,6 +693,7 @@ function(input, output){
                                  'Sum Post Length' = 'post_sum',
                                  'Median Post Length' = 'post_median',
                                  'Number of Posts' = 'post_count',
+                                 'Number of Posts (bin)' = 'post_count_bin',
                                  'Number of Images' = 'image_sum',
                                  'Median Number of Posts' = 'NumPostMedian',
                                  'Late Indicator' = 'LateIndicator',
@@ -704,6 +711,7 @@ function(input, output){
                                  'Sum Post Length' = 'post_sum',
                                  'Median Post Length' = 'post_median',
                                  'Number of Posts' = 'post_count',
+                                 'Number of Posts (bin)' = 'post_count_bin',
                                  'Number of Images' = 'image_sum',
                                  'Median Number of Posts' = 'NumPostMedian',
                                  'Late Indicator' = 'LateIndicator',
@@ -722,6 +730,15 @@ function(input, output){
       aes_string(colour = input$scatter_color)
     }
   })
+  
+  add_brewer_pallette <- reactive({
+    if(input$scatter_color == 'post_count_bin'){
+      scale_color_manual(values = brewer.pal(9, 'Blues')[c(-1, -2)])
+    }else{
+      NULL
+    }
+  })
+  
   #draw a smoothed line?
   scatter_smoothed <- reactive({
     if(input$smooth_sc){
@@ -751,10 +768,11 @@ function(input, output){
                  y = input$y_sc)+
       facet_scatter()+
       scatter_type()+
-      color_scatter()+
       scatter_smoothed()+
       auto_scale(axis = 'x', scale = input$x_sc_trans)+
-      auto_scale(axis = 'y', scale = input$y_sc_trans)
+      auto_scale(axis = 'y', scale = input$y_sc_trans)+
+      color_scatter()+
+      add_brewer_pallette()
     
   })
   
