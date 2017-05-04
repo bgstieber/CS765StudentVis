@@ -417,16 +417,22 @@ function(input, output){
     }
     
     # still working on implementing outlier detection
-    #problems:
-    #blindly fitting a model is not advised 
-    #need to think pretty hard about the coloring
-    #should only add one color aesthetic
-    # mod1 <- lmer(as.formula(paste0(input$heat_color, ' ~ ',
+    # problems:
+    # blindly fitting a model is not advised 
+    # need to think pretty hard about the coloring
+    # should only add one color aesthetic
+    # mod1 <- tryCatch(lmer(as.formula(paste0(input$heat_color, ' ~ ',
     #                                    'type * factor(assignment) + (1 | id)')),
     #                  data = dat_filter,
-    #                  na.action = na.exclude)
+    #                  na.action = na.exclude),
+    #                  error = function(e) 'An error occured'
+    # )
     # 
-    # dat_filter$outlier_check <- abs(residuals(mod1) / sd(residuals(mod1))) > 2
+    # if(is.character(mod1)){
+    #   dat_filter$outlier_check <- NA
+    # }else{
+    #   dat_filter$outlier_check <- abs(residuals(mod1) / sd(residuals(mod1))) > 2
+    # }
     
     dat_filter #return the data
   })
