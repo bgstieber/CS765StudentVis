@@ -330,30 +330,38 @@ function(input, output){
   ## Heat map ##
   ##############
   #allow user to color text in heatmap by the late indicator
-  color_by_text <- reactive({
+  add_text <- reactive({
     if(input$show_values){ #if user wants to see values
-        if(input$color_text_late){
-          geom_text(
-            aes_string(colour = 'LateIndicator', label = input$heat_color))
-        }else{
           geom_text(aes_string(label = input$heat_color))
-        }
     }else{
         NULL
     }
   })
-  #nice text coloring to allow for pop out
-  scale_colour_text <- reactive({
-    if(input$show_values){
-        if(input$color_text_late){
-        scale_colour_manual(values = c('Late' = 'blue', 'Not Late' = 'black'))
-        }else{
-          NULL
-        }
-    }else{
-      NULL
+  
+  add_tile <- reactive({
+    if(input$exclude_late | !input$color_box_late){
+      geom_tile()
+    }else if (input$color_box_late){
+      geom_tile(aes_string(colour = 'LateIndicator'), size = 1.01)
     }
   })
+  #nice text coloring to allow for pop out
+  color_box_late <- reactive({
+    if(input$exclude_late | !input$color_box_late){
+      NULL
+    }else if(input$color_box_late){
+      scale_colour_manual(values = c('Late' = 'blue', 'Not Late' = NA))
+    }
+  })
+  
+  legend_box_late <- reactive({
+    if(input$exclude_late | !input$color_box_late){
+      NULL
+    }else if(input$color_box_late){
+      guides(colour = guide_legend(override.aes = list(fill = 'white')))
+    }
+  })
+  
   #expression to control display of x-axis labels
   show_x_axis <- reactive({
     if(input$heat_x_show){
@@ -451,11 +459,13 @@ function(input, output){
         y = names)+
     ylab('')+
     aes_string(fill = input$heat_color) +
-    geom_tile() +
-    color_by_text()+
+    #geom_tile() +
+    add_tile()+
+    add_text()+
+    color_box_late()+
+    legend_box_late()+
     facet_wrap(~type, scales = c('fixed', 'free')[input$free_x_heat + 1])+
     scale_fill_gradientn(colors = brewer.pal(6, 'YlOrRd'))+
-    scale_colour_text() +
     show_x_axis()+
     theme(axis.text.y = element_text(size = 7))
   })

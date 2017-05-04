@@ -74,9 +74,9 @@ fluidPage(theme = shinytheme('simplex'),
                                       'Display Values on Heatmap',
                                       FALSE),
                         #should we color the text by the late indicator
-                        conditionalPanel("!input.exclude_late & input.show_values",
-                                         checkboxInput('color_text_late',
-                                                       'Color Text by Late Indicator',
+                        conditionalPanel("!input.exclude_late",
+                                         checkboxInput('color_box_late',
+                                                       'Color Cells by Late Indicator',
                                                        FALSE)
                                          )
                         ),
