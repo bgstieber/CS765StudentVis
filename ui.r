@@ -23,19 +23,23 @@ fluidPage(theme = shinytheme('simplex'),
                                     'Heatmap Color',
                                     c('Score' = 'score',
                                       'Longest Post' = 'post_max',
+                                      'Shortest Post' = 'post_min',
                                       'Average Post Length' = 'post_mean',
                                       'Sum Post Length' = 'post_sum',
+                                      'Median Post Length' = 'post_median',
                                       'Number of Posts' = 'post_count',
                                       'Number of Images' = 'image_sum'
-                                      )
+                                    )
                                     ),
                         # how should the heatmap be ordered
                         selectInput('heat_order',
                                     'Order Heatmap Tiles By',
                                     c('Score' = 'score',
                                       'Longest Post' = 'post_max',
+                                      'Shortest Post' = 'post_min',
                                       'Average Post Length' = 'post_mean',
                                       'Sum Post Length' = 'post_sum',
+                                      'Median Post Length' = 'post_median',
                                       'Number of Posts' = 'post_count',
                                       'Number of Images' = 'image_sum'
                                     )
@@ -99,11 +103,13 @@ fluidPage(theme = shinytheme('simplex'),
                                     'Histogram Measure',
                                     c('Score' = 'score',
                                       'Longest Post' = 'post_max',
+                                      'Shortest Post' = 'post_min',
                                       'Average Post Length' = 'post_mean',
                                       'Sum Post Length' = 'post_sum',
+                                      'Median Post Length' = 'post_median',
                                       'Number of Posts' = 'post_count',
-                                      'Number of Images' = 'image_sum')
-                                    ),
+                                      'Number of Images' = 'image_sum'
+                                    )),
                         #number of bins for histogram
                         sliderInput('hist_bin', label = 'Histogram Bins',
                                     min = 10, max = 200, value = 30),
@@ -232,7 +238,7 @@ fluidPage(theme = shinytheme('simplex'),
                           ),
                         selectInput('sc_type', 'Plot Type',
                                     c('Points', 'Jittered', 'Bubble'),
-                                    'Jittered'),
+                                    'Points'),
                         conditionalPanel(
                           "input.sc_type == 'Jittered'",
                           h6('Jittering adds a small amount of random variation to 
