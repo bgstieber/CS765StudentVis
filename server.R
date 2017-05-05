@@ -37,6 +37,17 @@ summary_fun <- function(x, name){
   vec
 }
 
+agg_fun <- function(agg_type, value){
+  switch(agg_type,
+         Mean = paste("~ mean(", value, ", na.rm = T)"),
+         Median = paste("~ median(", value, ", na.rm = T)"),
+         Max = paste("~ max(", value, ", na.rm = T)"),
+         Min = paste("~ min(", value, ", na.rm = T)"),
+         `1st Quartile` = paste("~quantile(", value, ", .25, na.rm = T)"),
+         `3rd Quartile` = paste("~quantile(", value, ", .75, na.rm = T)")
+         )
+}
+
 #scales and transformations for axes
 auto_scale <- function(axis = 'x', scale){
   if(axis == 'x'){
@@ -670,6 +681,7 @@ function(input, output){
   output$scatter_color <- renderUI({
     if (input$exclude_late){
       if(check_full_data_prompt()){
+        conditionalPanel("!input.sc_agg_data",
         selectInput('scatter_color',
                      'Color for Scatter Plot',
                      choices = c('None' = 'None',
@@ -684,8 +696,10 @@ function(input, output){
                                  'Number of Posts (bin)' = 'post_count_bin',
                                  'Number of Images' = 'image_sum',
                                  'Median Number of Posts' = 'NumPostMedian'
-                     ), selected = 'None')   
+                     ), selected = 'None')
+        )
       }else{
+        conditionalPanel("!input.sc_agg_data",
         selectInput('scatter_color',
                      'Color for Scatter Plot',
                      choices = c('None' = 'None',
@@ -702,9 +716,11 @@ function(input, output){
                                  'Median Number of Posts' = 'NumPostMedian',
                                  'Prompt' = 'assign_prompts'
                      ), selected = 'None')
+        )
       }
     }else{
       if(check_full_data_prompt()){
+        conditionalPanel("!input.sc_agg_data",
         selectInput('scatter_color',
                      'Color for Scatter Plot',
                      choices = c('None' = 'None',
@@ -722,7 +738,9 @@ function(input, output){
                                  'Late Indicator' = 'LateIndicator',
                                  'Late' = 'late'
                      ), selected = 'None')
+        )
       }else{
+        conditionalPanel("!input.sc_agg_data",
         selectInput('scatter_color',
                      'Color for Scatter Plot',
                      choices = c('None' = 'None',
@@ -741,6 +759,7 @@ function(input, output){
                                  'Late' = 'late',
                                  'Prompt' = 'assign_prompts'
                      ), selected = 'None')
+        )
       }
     }
   })
@@ -779,23 +798,65 @@ function(input, output){
   })
   # filter the scatter data appropriately
   scatter_data <- reactive({
+    if(!input$sc_agg_data){
     full_data() %>%
       filter(type %in% input$scat_type_filter)
+    }else{
+      full_data() %>%
+        filter(type %in% input$scat_type_filter) %>%
+        filter_(paste('is.finite(', input$x_sc, ')')) %>%
+        filter_(paste('is.finite(', input$y_sc, ')')) -> f_dat
+      
+      agg_x <- f_dat %>%
+        group_by(assign_name, type) %>%
+        summarise_(.dots = as.formula(agg_fun(input$sc_agg_type_x, 
+                                              input$x_sc))) %>%
+        ungroup()
+      
+      names(agg_x) <- c('assign_name', 'type',
+                        paste(input$sc_agg_type_x, input$x_sc, 'x'))
+      
+      agg_y <- f_dat %>%
+        group_by(assign_name, type) %>%
+        summarise_(.dots = as.formula(agg_fun(input$sc_agg_type_y, 
+                                              input$y_sc))) %>%
+        ungroup()
+      names(agg_y) <- c('assign_name', 'type', 
+                        paste(input$sc_agg_type_y, input$y_sc, 'y'))
+      
+      
+      dat_merge <- merge(agg_x, agg_y, by = c('assign_name','type'))
+      
+      names(dat_merge) <- c('assign_name','type',
+                            input$x_sc, input$y_sc)
+      dat_merge
+    }
   })
   
   #make the scatter plot
   output$scatter <- renderPlot({
-    
-    ggplot(scatter_data()) +
-      aes_string(x = input$x_sc,
-                 y = input$y_sc)+
-      facet_scatter()+
-      scatter_type()+
-      scatter_smoothed()+
-      auto_scale(axis = 'x', scale = input$x_sc_trans)+
-      auto_scale(axis = 'y', scale = input$y_sc_trans)+
-      color_scatter()+
-      add_brewer_pallette()
+    if(input$sc_agg_data){
+      ggplot(scatter_data()) +
+        aes_string(x = input$x_sc, y = input$y_sc) +
+        facet_scatter()+
+        scatter_type()+
+        scatter_smoothed()+
+        auto_scale(axis = 'x', scale = input$x_sc_trans)+
+        auto_scale(axis = 'y', scale = input$y_sc_trans)+
+        xlab(paste0(input$x_sc, ' (', input$sc_agg_type_x, ')'))+
+        ylab(paste0(input$y_sc, ' (', input$sc_agg_type_y, ')'))
+    }else{
+      ggplot(scatter_data()) +
+        aes_string(x = input$x_sc,
+                   y = input$y_sc)+
+        facet_scatter()+
+        scatter_type()+
+        scatter_smoothed()+
+        auto_scale(axis = 'x', scale = input$x_sc_trans)+
+        auto_scale(axis = 'y', scale = input$y_sc_trans)+
+        color_scatter()+
+        add_brewer_pallette() 
+    }
     
   })
   
@@ -806,8 +867,8 @@ function(input, output){
   brushed_scatter_data <- reactive({
     req(input$sc_plot_brush) #only react to a brushing
     #which variables
-    x.axis.var <- input$x_sc
-    y.axis.var <- input$y_sc
+      x.axis.var <- input$x_sc
+      y.axis.var <- input$y_sc
     #may need to transform in case we use different scales
     #for some reason (?) plot changes for sqrt, but not log2
     x.axis.trans <- switch(input$x_sc_trans,
