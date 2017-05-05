@@ -539,6 +539,7 @@ function(input, output){
       if(input$facet_hist2){
         #need to calculate mean and median by type
         full_data() %>% 
+          filter_(paste('is.finite(', input$hist_value, ')')) %>%
           filter(assign_name %in% input$hist_assign_filter) %>%
           group_by(type) %>%
           summarise_(avg_value = paste('mean(', input$hist_value, ', na.rm = T)'),
@@ -547,6 +548,7 @@ function(input, output){
           setNames(., c('type', 'mean','median'))
       }else{
         full_data() %>% 
+          filter_(paste('is.finite(', input$hist_value, ')')) %>%
           filter(assign_name %in% input$hist_assign_filter) %>%
           summarise_(avg_value = paste('mean(', input$hist_value, ', na.rm = T)'),
                      .dots = as.formula(paste0("~ median(", input$hist_value,
@@ -556,6 +558,7 @@ function(input, output){
     }else{
       if(is.null(input$facet_hist)){
         full_data() %>% 
+          filter_(paste('is.finite(', input$hist_value, ')')) %>%
           filter(assign_name %in% input$hist_assign_filter) %>%
           summarise_(avg_value = paste('mean(', input$hist_value, ', na.rm = T)'),
                      .dots = as.formula(paste0("~ median(", input$hist_value,
@@ -564,6 +567,7 @@ function(input, output){
       }else if(all(input$facet_hist == 'Late Indicator')){
         #calculate mean and median by late indicator
         full_data() %>% 
+          filter_(paste('is.finite(', input$hist_value, ')')) %>%
           filter(assign_name %in% input$hist_assign_filter) %>%
           group_by(LateIndicator) %>%
           summarise_(avg_value = paste('mean(', input$hist_value, ', na.rm = T)'),
@@ -572,7 +576,8 @@ function(input, output){
           setNames(., c('LateIndicator', 'mean','median'))
       }else if(all(input$facet_hist == 'Assignment Type')){
         #calculate mean and median by type
-        full_data() %>% 
+        full_data() %>%
+          filter_(paste('is.finite(', input$hist_value, ')')) %>%
           filter(assign_name %in% input$hist_assign_filter) %>%
           group_by(type) %>%
           summarise_(avg_value = paste('mean(', input$hist_value, ', na.rm = T)'),
@@ -581,6 +586,7 @@ function(input, output){
           setNames(., c('type', 'mean','median'))
       }else if(all(input$facet_hist == c('Assignment Type','Late Indicator'))){
         full_data() %>% 
+          filter_(paste('is.finite(', input$hist_value, ')')) %>%
           filter(assign_name %in% input$hist_assign_filter) %>%
           group_by(type, LateIndicator) %>%
           summarise_(avg_value = paste('mean(', input$hist_value, ', na.rm = T)'),
@@ -589,6 +595,7 @@ function(input, output){
           setNames(., c('type','LateIndicator', 'mean','median'))
       }else{
         full_data() %>% 
+          filter_(paste('is.finite(', input$hist_value, ')')) %>%
           filter(assign_name %in% input$hist_assign_filter) %>%
           summarise_(avg_value = paste('mean(', input$hist_value, ', na.rm = T)'),
                      .dots = as.formula(paste0("~ median(", input$hist_value,
