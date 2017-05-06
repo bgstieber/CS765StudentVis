@@ -28,7 +28,8 @@ fluidPage(theme = shinytheme('simplex'),
                                       'Sum Post Length' = 'post_sum',
                                       'Median Post Length' = 'post_median',
                                       'Number of Posts' = 'post_count',
-                                      'Number of Images' = 'image_sum'
+                                      'Number of Images' = 'image_sum',
+                                      'Average Images per Post' = 'image_mean'
                                     )
                                     ),
                         # how should the heatmap be ordered
@@ -41,7 +42,8 @@ fluidPage(theme = shinytheme('simplex'),
                                       'Sum Post Length' = 'post_sum',
                                       'Median Post Length' = 'post_median',
                                       'Number of Posts' = 'post_count',
-                                      'Number of Images' = 'image_sum'
+                                      'Number of Images' = 'image_sum',
+                                      'Average Images per Post' = 'image_mean'
                                     )
                                     ),
                         #choose aggregation for ordering
@@ -108,7 +110,8 @@ fluidPage(theme = shinytheme('simplex'),
                                       'Sum Post Length' = 'post_sum',
                                       'Median Post Length' = 'post_median',
                                       'Number of Posts' = 'post_count',
-                                      'Number of Images' = 'image_sum'
+                                      'Number of Images' = 'image_sum',
+                                      'Average Images per Post' = 'image_mean'
                                     )),
                         #number of bins for histogram
                         sliderInput('hist_bin', label = 'Histogram Bins',
@@ -209,6 +212,7 @@ fluidPage(theme = shinytheme('simplex'),
                                       'Median Post Length' = 'post_median',
                                       'Number of Posts' = 'post_count',
                                       'Number of Images' = 'image_sum',
+                                      'Average Images per Post' = 'image_mean',
                                       'Median Number of Posts' = 'NumPostMedian'
                                     ), selected = 'post_mean'),
                         selectInput('y_sc','Y',
@@ -221,6 +225,7 @@ fluidPage(theme = shinytheme('simplex'),
                                       'Median Post Length' = 'post_median',
                                       'Number of Posts' = 'post_count',
                                       'Number of Images' = 'image_sum',
+                                      'Average Images per Post' = 'image_mean',
                                       'Median Number of Posts' = 'NumPostMedian'
                                     ), selected = 'score'),
                         uiOutput('scatter_color'),

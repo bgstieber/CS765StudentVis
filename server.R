@@ -695,6 +695,7 @@ function(input, output){
                                  'Number of Posts' = 'post_count',
                                  'Number of Posts (bin)' = 'post_count_bin',
                                  'Number of Images' = 'image_sum',
+                                 'Average Images per Post' = 'image_mean',
                                  'Median Number of Posts' = 'NumPostMedian'
                      ), selected = 'None')
         )
@@ -713,6 +714,7 @@ function(input, output){
                                  'Number of Posts' = 'post_count',
                                  'Number of Posts (bin)' = 'post_count_bin',
                                  'Number of Images' = 'image_sum',
+                                 'Average Images per Post' = 'image_mean',
                                  'Median Number of Posts' = 'NumPostMedian',
                                  'Prompt' = 'assign_prompts'
                      ), selected = 'None')
@@ -734,6 +736,7 @@ function(input, output){
                                  'Number of Posts' = 'post_count',
                                  'Number of Posts (bin)' = 'post_count_bin',
                                  'Number of Images' = 'image_sum',
+                                 'Average Images per Post' = 'image_mean',
                                  'Median Number of Posts' = 'NumPostMedian',
                                  'Late Indicator' = 'LateIndicator',
                                  'Late' = 'late'
@@ -754,6 +757,7 @@ function(input, output){
                                  'Number of Posts' = 'post_count',
                                  'Number of Posts (bin)' = 'post_count_bin',
                                  'Number of Images' = 'image_sum',
+                                 'Average Images per Post' = 'image_mean',
                                  'Median Number of Posts' = 'NumPostMedian',
                                  'Late Indicator' = 'LateIndicator',
                                  'Late' = 'late',
