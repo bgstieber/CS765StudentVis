@@ -76,6 +76,11 @@ fluidPage(theme = shinytheme('simplex'),
                         checkboxInput('free_x_heat',
                                       'Free x-axis scales',
                                       FALSE),
+                        conditionalPanel("input.free_x_heat",
+                                         h5('Using free scales may negatively
+                                            impact the ability to get details-on-demand
+                                            via point-and-click.')
+                                         ),
                         checkboxInput('show_values',
                                       'Display Values on Heatmap',
                                       FALSE),
@@ -372,9 +377,8 @@ fluidPage(theme = shinytheme('simplex'),
            h5('For the late cutoff, all assignments later than the cutoff will be marked late.'),
            h4('Exclusions'),
            checkboxInput('exclude_late', 'Exclude Late Assignments', FALSE),
-           checkboxInput('exclude_zero', 'Exclude Records with Zero Posts',
-                         FALSE),
            uiOutput('score_filter'),
+           uiOutput('post_filter'),
            h3('Number of Observations'),
            verbatimTextOutput('json_sample')
            )

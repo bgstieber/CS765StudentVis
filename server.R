@@ -306,8 +306,7 @@ function(input, output){
   full_data_prep <- reactive({
     base_data() %>%
     mutate(LateIndicator = ifelse(late > input$late_cut, 'Late', 'Not Late')) %>%
-    filter(LateIndicator %in% late_vector()) %>%
-    filter(post_count >= (0 + input$exclude_zero))
+    filter(LateIndicator %in% late_vector())
     }
   )
   #add score filter to display
@@ -320,10 +319,24 @@ function(input, output){
                                               value = range(full_data_prep()$score,
                                                             na.rm = TRUE))
   })
+  ##add post filter to display
+  output$post_filter <- renderUI({sliderInput('post_filter',
+                                               'Select Post Filter',
+                                               min = min(full_data_prep()$post_count,
+                                                         na.rm = TRUE),
+                                               max = max(full_data_prep()$post_count,
+                                                         na.rm = TRUE),
+                                               value = range(full_data_prep()$post_count,
+                                                             na.rm = TRUE))
+  })
+  
+  
+  
   #filter appropriately
   full_data <- reactive({
     full_data_prep() %>%
-      filter(score >= input$score_filter[1] & score <= input$score_filter[2])
+      filter(score >= input$score_filter[1] & score <= input$score_filter[2]) %>%
+      filter(post_count >= input$post_filter[1] & post_count <= input$post_filter[2])
   })
   #data table showing how we've coded the assignments
   output$assign_table <- renderDataTable({
