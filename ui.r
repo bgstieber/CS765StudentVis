@@ -333,7 +333,7 @@ fluidPage(theme = shinytheme('simplex'),
                         label = NULL,
                         choices = c('Simple (3x3)', 'Simple (20x10)', 
                                     'Real (50x15)', 'Real (100x15)',
-                                    'Real (CS 838)',
+                                    'Real (CS 838)', 'Real (CS 838-50)',
                                     'Upload my Own')),
            
            conditionalPanel("input.file_selection == 'Upload my Own'",

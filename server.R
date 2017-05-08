@@ -22,7 +22,10 @@ real_oneH_by_fifteen <-
   "https://raw.githubusercontent.com/uwgraphics/cs765-dc3-data-and-code/master/RealisticData/100x15.json"
 
 real_838 <-
-  "https://raw.githubusercontent.com/uwgraphics/cs765-dc3-data-and-code/master/RealisticData/765-old-anon.json"
+  "https://raw.githubusercontent.com/uwgraphics/cs765-dc3-data-and-code/master/RealisticData/765-2015-anon-gb.json"
+
+real_838_50 <- 
+"https://raw.githubusercontent.com/uwgraphics/cs765-dc3-data-and-code/master/RealisticData/765-2015-anon-gb50.json"
 
 # summarise a numeric vector
 summary_fun <- function(x, name){
@@ -274,6 +277,7 @@ function(input, output){
            'Real (50x15)' = real_fifty_by_fifteen,
            'Real (100x15)' = real_oneH_by_fifteen,
            'Real (CS 838)' = real_838,
+           'Real (CS 838-50)' = real_838_50,
            'Upload my Own' = NULL)
   })
   #user file upload  
